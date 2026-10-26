@@ -1,0 +1,195 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/net/spawner_jugadores.gd" id="1_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/levels/objetos/caja.tscn" id="2_caja"]
+[ext_resource type="PackedScene" path="res://scenes/levels/objetos/boton.tscn" id="3_boton"]
+[ext_resource type="Script" path="res://scripts/puzzles/puzzle_botones.gd" id="4_puzzle"]
+[ext_resource type="Script" path="res://scripts/roles/siluetas.gd" id="5_siluetas"]
+[ext_resource type="Script" path="res://scripts/net/control_rondas.gd" id="6_rondas"]
+[ext_resource type="Script" path="res://scenes/ui/aviso_ronda.gd" id="7_aviso"]
+
+[sub_resource type="Environment" id="entorno"]
+background_mode = 1
+background_color = Color(0.55, 0.65, 0.75, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.8, 0.85, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="material_suelo"]
+albedo_color = Color(0.45, 0.5, 0.4, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_pared"]
+albedo_color = Color(0.8, 0.75, 0.65, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_pared_botones"]
+albedo_color = Color(0.55, 0.6, 0.7, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_marco"]
+albedo_color = Color(0.3, 0.3, 0.35, 1)
+
+[node name="cuarto_botones" type="Node3D"]
+
+[node name="entorno" type="WorldEnvironment" parent="."]
+environment = SubResource("entorno")
+
+[node name="sol" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8253, 0, -0.5646, -0.4423, 0.6216, -0.6465, 0.351, 0.7833, 0.513, 0, 6, 0)
+light_energy = 0.9
+
+[node name="geometria" type="Node3D" parent="."]
+
+[node name="suelo" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(14, 1, 14)
+material = SubResource("material_suelo")
+
+[node name="pared_norte" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -7.25)
+use_collision = true
+size = Vector3(14, 3, 0.5)
+material = SubResource("material_pared_botones")
+
+[node name="pared_sur" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 7.25)
+use_collision = true
+size = Vector3(14, 3, 0.5)
+material = SubResource("material_pared")
+
+[node name="pared_este" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.25, 1.5, 0)
+use_collision = true
+size = Vector3(0.5, 3, 15)
+material = SubResource("material_pared")
+
+[node name="pared_oeste" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, 1.5, 0)
+use_collision = true
+size = Vector3(0.5, 3, 15)
+material = SubResource("material_pared")
+
+[node name="marco_botones" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -6.98)
+size = Vector3(2.9, 2.1, 0.04)
+material = SubResource("material_marco")
+
+[node name="puzzle_botones" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.96)
+script = ExtResource("4_puzzle")
+
+[node name="boton_0" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 2.0, 0)
+
+[node name="boton_1" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 2.0, 0)
+
+[node name="boton_2" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 2.0, 0)
+
+[node name="boton_3" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 1.4, 0)
+
+[node name="boton_4" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 1.4, 0)
+
+[node name="boton_5" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 1.4, 0)
+
+[node name="boton_6" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.8, 0)
+
+[node name="boton_7" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.8, 0)
+
+[node name="boton_8" parent="puzzle_botones" instance=ExtResource("3_boton")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.8, 0)
+
+[node name="letrero" type="Label3D" parent="puzzle_botones"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0.02)
+pixel_size = 0.004
+modulate = Color(0.15, 0.15, 0.2, 1)
+outline_size = 0
+text = "Solo el CIEGO puede presionar los botones"
+font_size = 64
+
+[node name="objetos" type="Node3D" parent="."]
+
+[node name="caja_1" parent="objetos" instance=ExtResource("2_caja")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.25, 1)
+
+[node name="caja_2" parent="objetos" instance=ExtResource("2_caja")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0.25, 1)
+
+[node name="caja_3" parent="objetos" instance=ExtResource("2_caja")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0.75, 1)
+
+[node name="puntos_aparicion" type="Node3D" parent="."]
+
+[node name="punto_1" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 4)
+
+[node name="punto_2" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+
+[node name="punto_3" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 4)
+
+[node name="jugadores" type="Node3D" parent="."]
+
+[node name="spawner_jugadores" type="MultiplayerSpawner" parent="." node_paths=PackedStringArray("puntos_aparicion")]
+spawn_path = NodePath("../jugadores")
+script = ExtResource("1_spawner")
+puntos_aparicion = NodePath("../puntos_aparicion")
+
+[node name="siluetas" type="Node" parent="."]
+script = ExtResource("5_siluetas")
+
+[node name="control_rondas" type="Node" parent="." node_paths=PackedStringArray("puzzle", "spawner", "aviso")]
+script = ExtResource("6_rondas")
+puzzle = NodePath("../puzzle_botones")
+spawner = NodePath("../spawner_jugadores")
+aviso = NodePath("../interfaz/aviso_ronda")
+
+[node name="interfaz" type="CanvasLayer" parent="."]
+
+[node name="aviso_ronda" type="Control" parent="interfaz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_aviso")
+
+[node name="centro" type="CenterContainer" parent="interfaz/aviso_ronda"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 40.0
+offset_bottom = 260.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="columna" type="VBoxContainer" parent="interfaz/aviso_ronda/centro"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="titulo" type="Label" parent="interfaz/aviso_ronda/centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 56
+horizontal_alignment = 1
+
+[node name="subtitulo" type="Label" parent="interfaz/aviso_ronda/centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+autowrap_mode = 3

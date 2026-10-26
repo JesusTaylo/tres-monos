@@ -1,0 +1,2 @@
+# Godot usa finales de línea LF; así se mantienen iguales en Windows y en otros sistemas.
+* text=auto eol=lf

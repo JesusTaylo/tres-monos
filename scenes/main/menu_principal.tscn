@@ -1,0 +1,85 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/main/menu_principal.gd" id="1_menu"]
+
+[node name="menu_principal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="fondo" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.1, 0.09, 1)
+
+[node name="centro" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="columna" type="VBoxContainer" parent="centro"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="titulo" type="Label" parent="centro/columna"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "TRES MONOS"
+horizontal_alignment = 1
+
+[node name="subtitulo" type="Label" parent="centro/columna"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "no ve · no oye · no habla"
+horizontal_alignment = 1
+
+[node name="espacio" type="Control" parent="centro/columna"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="boton_hospedar" type="Button" parent="centro/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Hospedar"
+
+[node name="fila_unirse" type="HBoxContainer" parent="centro/columna"]
+layout_mode = 2
+
+[node name="campo_ip" type="LineEdit" parent="centro/columna/fila_unirse"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "127.0.0.1"
+
+[node name="boton_unirse" type="Button" parent="centro/columna/fila_unirse"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 44)
+layout_mode = 2
+text = "Unirse"
+
+[node name="boton_cancelar" type="Button" parent="centro/columna"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Cancelar"
+
+[node name="etiqueta_estado" type="Label" parent="centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3

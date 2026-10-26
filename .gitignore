@@ -1,0 +1,24 @@
+# Godot 4: caché del editor e importaciones (se regeneran solas)
+.godot/
+
+# Plantillas de exportación de Android
+/android/
+
+# Presets de exportación: pueden incluir rutas locales o credenciales de firma
+export_presets.cfg
+
+# Builds exportados
+/build/
+/export/
+
+# Archivos temporales y del sistema operativo
+*.tmp
+*.translation
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Mono/C# (por si algún día se usa)
+.mono/
+data_*/
+mono_crash.*.json

@@ -1,0 +1,106 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/main/lobby.gd" id="1_lobby"]
+
+[node name="lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lobby")
+
+[node name="fondo" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.1, 0.09, 1)
+
+[node name="centro" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="columna" type="VBoxContainer" parent="centro"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="titulo" type="Label" parent="centro/columna"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "LOBBY"
+horizontal_alignment = 1
+
+[node name="etiqueta_ip" type="Label" parent="centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="etiqueta_estado" type="Label" parent="centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="marco_lista" type="PanelContainer" parent="centro/columna"]
+layout_mode = 2
+
+[node name="margen" type="MarginContainer" parent="centro/columna/marco_lista"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="lista_jugadores" type="VBoxContainer" parent="centro/columna/marco_lista/margen"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+
+[node name="panel_mi_rol" type="VBoxContainer" parent="centro/columna"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="etiqueta_mi_rol" type="Label" parent="centro/columna/panel_mi_rol"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+
+[node name="etiqueta_descripcion" type="Label" parent="centro/columna/panel_mi_rol"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="boton_asignar" type="Button" parent="centro/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+disabled = true
+text = "Asignar roles"
+
+[node name="boton_empezar" type="Button" parent="centro/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+disabled = true
+text = "Empezar"
+
+[node name="boton_salir" type="Button" parent="centro/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Salir"
