@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/main/menu_principal.gd" id="1_menu"]
 [ext_resource type="PackedScene" path="res://scenes/ui/panel_opciones.tscn" id="2_opciones"]
+[ext_resource type="Texture2D" path="res://assets/ui/logo.png" id="3_logo"]
 
 [node name="menu_principal" type="Control"]
 layout_mode = 3
@@ -34,12 +35,12 @@ custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="titulo" type="Label" parent="centro/columna"]
+[node name="logo" type="TextureRect" parent="centro/columna"]
+custom_minimum_size = Vector2(480, 225)
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
-text = "MONKEY SEE,
-MONKEY DON'T"
-horizontal_alignment = 1
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="subtitulo" type="Label" parent="centro/columna"]
 layout_mode = 2
