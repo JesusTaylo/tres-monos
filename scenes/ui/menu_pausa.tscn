@@ -1,0 +1,76 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/menu_pausa.gd" id="1_pausa"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_opciones.tscn" id="2_opciones"]
+
+[sub_resource type="StyleBoxFlat" id="fondo_panel"]
+bg_color = Color(0.1, 0.09, 0.08, 0.92)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[node name="menu_pausa" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pausa")
+
+[node name="oscurecer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.35)
+
+[node name="centro" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="panel" type="PanelContainer" parent="centro"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("fondo_panel")
+
+[node name="columna" type="VBoxContainer" parent="centro/panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="titulo" type="Label" parent="centro/panel/columna"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Pausa"
+horizontal_alignment = 1
+
+[node name="nota" type="Label" parent="centro/panel/columna"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+text = "La partida sigue para los demás."
+horizontal_alignment = 1
+
+[node name="continuar" type="Button" parent="centro/panel/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Continuar (Esc)"
+
+[node name="panel_opciones" parent="centro/panel/columna" instance=ExtResource("2_opciones")]
+layout_mode = 2
+
+[node name="salir" type="Button" parent="centro/panel/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Salir al menú"

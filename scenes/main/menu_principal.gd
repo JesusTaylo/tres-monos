@@ -9,6 +9,7 @@ const IP_POR_DEFECTO := "127.0.0.1"
 @onready var _campo_ip: LineEdit = %campo_ip
 @onready var _boton_unirse: Button = %boton_unirse
 @onready var _boton_cancelar: Button = %boton_cancelar
+@onready var _capa_opciones: Control = %capa_opciones
 @onready var _etiqueta_estado: Label = %etiqueta_estado
 
 
@@ -17,6 +18,8 @@ func _ready() -> void:
 	_boton_unirse.pressed.connect(_al_presionar_unirse)
 	_campo_ip.text_submitted.connect(func(_texto: String) -> void: _al_presionar_unirse())
 	_boton_cancelar.pressed.connect(_al_presionar_cancelar)
+	%boton_opciones.pressed.connect(_capa_opciones.show)
+	%boton_volver.pressed.connect(_capa_opciones.hide)
 
 	Red.conexion_exitosa.connect(_ir_al_lobby)
 	Red.desconectado.connect(_al_desconectarse)

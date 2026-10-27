@@ -1,0 +1,71 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/panel_opciones.gd" id="1_panel"]
+
+[node name="panel_opciones" type="VBoxContainer"]
+custom_minimum_size = Vector2(380, 0)
+theme_override_constants/separation = 8
+script = ExtResource("1_panel")
+
+[node name="titulo" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Opciones de voz"
+
+[node name="etiqueta_microfono" type="Label" parent="."]
+layout_mode = 2
+text = "Micrófono"
+
+[node name="microfono" type="OptionButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+clip_text = true
+
+[node name="etiqueta_entrada" type="Label" parent="."]
+layout_mode = 2
+text = "Volumen del micrófono"
+
+[node name="volumen_entrada" type="HSlider" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 3.0
+step = 0.05
+value = 1.0
+
+[node name="medidor" type="ProgressBar" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+max_value = 0.6
+show_percentage = false
+
+[node name="aviso_micro" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.4, 1)
+autowrap_mode = 3
+
+[node name="etiqueta_salida" type="Label" parent="."]
+layout_mode = 2
+text = "Volumen de las voces"
+
+[node name="volumen_salida" type="HSlider" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="etiqueta_modo" type="Label" parent="."]
+layout_mode = 2
+text = "Modo"
+
+[node name="modo" type="OptionButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="voz_prueba" type="CheckBox" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Voz de prueba en bucle (solo debug)"

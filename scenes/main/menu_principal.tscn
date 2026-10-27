@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scenes/main/menu_principal.gd" id="1_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_opciones.tscn" id="2_opciones"]
 
 [node name="menu_principal" type="Control"]
 layout_mode = 3
@@ -36,7 +37,8 @@ theme_override_constants/separation = 12
 [node name="titulo" type="Label" parent="centro/columna"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 48
-text = "TRES MONOS"
+text = "MONKEY SEE,
+MONKEY DON'T"
 horizontal_alignment = 1
 
 [node name="subtitulo" type="Label" parent="centro/columna"]
@@ -71,6 +73,12 @@ custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
 text = "Unirse"
 
+[node name="boton_opciones" type="Button" parent="centro/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+text = "Opciones"
+
 [node name="boton_cancelar" type="Button" parent="centro/columna"]
 unique_name_in_owner = true
 visible = false
@@ -83,3 +91,35 @@ unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
+
+[node name="capa_opciones" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.1, 0.09, 1)
+
+[node name="centro" type="CenterContainer" parent="capa_opciones"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="columna" type="VBoxContainer" parent="capa_opciones/centro"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="panel_opciones" parent="capa_opciones/centro/columna" instance=ExtResource("2_opciones")]
+layout_mode = 2
+
+[node name="boton_volver" type="Button" parent="capa_opciones/centro/columna"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Volver"

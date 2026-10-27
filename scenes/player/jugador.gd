@@ -18,6 +18,7 @@ var _gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var punto_agarre: Marker3D = $cabeza/punto_agarre
 @onready var _camara: Camera3D = $cabeza/camara
 @onready var _rayo: RayCast3D = $cabeza/camara/rayo
+@onready var _menu_pausa: MenuPausa = $hud/menu_pausa
 
 
 ## Busca el jugador de un peer en la escena actual.
@@ -54,8 +55,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		cabeza.rotation.x = clampf(cabeza.rotation.x - event.relative.y * SENSIBILIDAD_MOUSE,
 			-LIMITE_CABEZA, LIMITE_CABEZA)
 	elif event.is_action_pressed("liberar_mouse"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	elif event is InputEventMouseButton and event.pressed \
+		# Esc abre/cierra el menú de pausa (libera el mouse; la partida sigue).
+		_menu_pausa.alternar()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed and not _menu_pausa.visible \
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		# Clic dentro de la ventana para volver a capturar el mouse.
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -85,10 +88,12 @@ func teletransportar(posicion: Vector3, giro: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= _gravedad * delta
-	elif Input.is_action_just_pressed("saltar"):
+	elif Input.is_action_just_pressed("saltar") and not _menu_pausa.visible:
 		velocity.y = VELOCIDAD_SALTO
 
 	var entrada := Input.get_vector("mover_izquierda", "mover_derecha", "mover_adelante", "mover_atras")
+	if _menu_pausa.visible:
+		entrada = Vector2.ZERO
 	var direccion := transform.basis * Vector3(entrada.x, 0.0, entrada.y)
 	var objetivo := direccion * VELOCIDAD
 	var aceleracion := ACELERACION_SUELO if is_on_floor() else ACELERACION_AIRE

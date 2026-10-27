@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/jugador.gd" id="1_jugador"]
 [ext_resource type="Script" path="res://scripts/systems/interaccion.gd" id="2_interaccion"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scenes/player/animador_gestos.gd" id="6_animador"]
 [ext_resource type="Script" path="res://scenes/ui/rueda_gestos.gd" id="7_rueda"]
 [ext_resource type="Script" path="res://scenes/ui/indicador_rol.gd" id="8_indicador"]
+[ext_resource type="Script" path="res://scenes/player/voz_jugador.gd" id="9_voz"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="10_pausa"]
 
 [sub_resource type="CapsuleShape3D" id="forma_cuerpo"]
 radius = 0.35
@@ -37,6 +39,12 @@ height = 0.16
 [sub_resource type="BoxMesh" id="malla_pulgar"]
 size = Vector3(0.04, 0.12, 0.04)
 
+[sub_resource type="BoxMesh" id="malla_boca"]
+size = Vector3(0.16, 0.035, 0.06)
+
+[sub_resource type="StandardMaterial3D" id="material_boca"]
+albedo_color = Color(0.35, 0.05, 0.08, 1)
+
 [sub_resource type="SceneReplicationConfig" id="config_sincronizacion"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
@@ -53,6 +61,9 @@ properties/3/replication_mode = 2
 properties/4/path = NodePath("gestos:punto_apuntado")
 properties/4/spawn = true
 properties/4/replication_mode = 2
+properties/5/path = NodePath("voz:nivel_voz")
+properties/5/spawn = true
+properties/5/replication_mode = 2
 
 [node name="jugador" type="CharacterBody3D"]
 collision_layer = 2
@@ -118,6 +129,19 @@ layers = 4
 mesh = SubResource("malla_ojos")
 surface_material_override/0 = SubResource("material_ojos")
 
+[node name="boca" type="MeshInstance3D" parent="cabeza/cara"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.17, -0.32)
+layers = 4
+mesh = SubResource("malla_boca")
+surface_material_override/0 = SubResource("material_boca")
+
+[node name="altavoz_voz" type="AudioStreamPlayer3D" parent="cabeza"]
+unit_size = 3.0
+max_db = 3.0
+max_distance = 18.0
+bus = &"Voz"
+doppler_tracking = 0
+
 [node name="camara" type="Camera3D" parent="cabeza"]
 fov = 80.0
 
@@ -153,6 +177,11 @@ hombro_derecho = NodePath("../modelo/hombro_derecho")
 cara = NodePath("../cabeza/cara")
 pulgar = NodePath("../modelo/hombro_derecho/pulgar")
 
+[node name="voz" type="Node" parent="." node_paths=PackedStringArray("altavoz", "boca")]
+script = ExtResource("9_voz")
+altavoz = NodePath("../cabeza/altavoz_voz")
+boca = NodePath("../cabeza/cara/boca")
+
 [node name="sincronizador" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("config_sincronizacion")
 
@@ -185,7 +214,7 @@ offset_right = 600.0
 offset_bottom = -10.0
 grow_vertical = 0
 theme_override_colors/font_color = Color(1, 1, 1, 0.7)
-text = "WASD: caminar · Espacio: saltar · E / clic: agarrar/presionar · Q: gestos · clic der.: señalar · Esc: mouse"
+text = "WASD: caminar · Espacio: saltar · E / clic: agarrar/presionar · Q: gestos · clic der.: señalar · V: hablar · Esc: pausa"
 
 [node name="rueda" type="Control" parent="hud"]
 layout_mode = 3
@@ -238,3 +267,5 @@ theme_override_colors/font_color = Color(1, 1, 1, 0.75)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 16
+
+[node name="menu_pausa" parent="hud" instance=ExtResource("10_pausa")]

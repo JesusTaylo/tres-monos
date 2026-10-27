@@ -1,4 +1,6 @@
-# Tres Monos (título provisional)
+# Monkey See, Monkey Don't
+
+(Antes «Tres Monos»; la carpeta del proyecto y el repositorio `tres-monos` conservan el nombre viejo.)
 
 Juego cooperativo multijugador de comedia ("friendslop") en primera persona para 3+ jugadores.
 Inspirado en los tres monos sabios: uno no ve, uno no oye, uno no habla. Deben resolver puzzles
@@ -26,8 +28,10 @@ Cadena de información: **Mudo → (gestos) → Sordo → (voz) → Ciego → (a
 - **Red:** API de multijugador de alto nivel de Godot (`ENetMultiplayerPeer`,
   `MultiplayerSpawner`, `MultiplayerSynchronizer`, RPCs). Modelo host-cliente: el host es autoridad
   sobre el estado del puzzle y la asignación de roles.
-- **Voz (Hito 2):** chat de proximidad con `AudioEffectCapture` + `AudioStreamPlayer3D` por jugador.
-  Evaluar plugin de VOIP con compresión, o GodotSteam si se publica en Steam.
+- **Voz (Hito 2):** chat de proximidad con **TwoVoIP** (Opus + RNNoise, GDExtension en
+  `addons/twovoip/`) + `AudioStreamPlayer3D` por jugador. Captura con `AudioServer.get_input_frames`
+  (nativo de 4.7). **Fijado en v6.5**: la v6.6 cierra el editor de 4.7 al abrir el proyecto
+  (issue #107 de TwoVoIP). Ver `addons/twovoip/VERSION.md` antes de actualizar.
 
 ## Cómo implementar la percepción de cada rol
 
@@ -103,6 +107,8 @@ aparte, con clic derecho mantenido**, para apuntar en vivo. Faltan: más, menos,
 | `Red` | `scripts/net/red.gd` | ENet host/cliente, saludo de autenticación, señales de conexión |
 | `Lobby` | `scripts/net/lobby.gd` | Jugadores, roles, rotación y cambios de escena (menú ↔ lobby ↔ nivel) |
 | `Ruido` | `scripts/systems/ruido.gd` | Emite `NoiseEvent` y los entrega solo al Ciego |
+| `Microfono` | `scripts/voz/microfono.gd` | Lee el micrófono (o la voz de prueba), decide si se habla, entrega paquetes Opus |
+| `Opciones` | `scripts/systems/opciones.gd` | Opciones de audio; aplica y guarda en `user://opciones.cfg` |
 | `VentanasDebug` | `scripts/systems/ventanas_debug.gd` | En debug, acomoda las ventanas de cada instancia en 2×2 |
 
 **Autoridad y red**
@@ -121,8 +127,21 @@ aparte, con clic derecho mantenido**, para apuntar en vivo. Faltan: más, menos,
 **Interfaz de un puzzle** (para `control_rondas.gd`): señal `resuelto` (emitida en el host) y método
 `reiniciar()`. Cada nivel tiene un nodo `control_rondas`, uno `siluetas` y un `spawner_jugadores`.
 
+**Voz**: `scripts/voz/codec_voz.gd` es el **único** archivo que conoce TwoVoIP (crea sus clases con
+`ClassDB.instantiate`, así el resto compila aunque falte la extensión). Para cambiar de códec,
+reemplazar ese archivo con los mismos métodos. `scenes/player/voz_jugador.gd` envía y reproduce:
+canal de red 2 (`unreliable_ordered`), colchón de ~60 ms, descarta si se atrasa más de 0.4 s.
+El volumen con que habla cada uno (`nivel_voz`) se replica aparte para la boca, y la voz emite
+`NoiseEvent` cada 0.3 s. Altavoz 3D: `unit_size` 3, `max_distance` 18 m, bus "Voz".
+
 **Controles**: WASD caminar · Espacio saltar · E / clic agarrar, soltar y presionar · Q (mantener)
-rueda de gestos · clic derecho (mantener) señalar · Esc liberar el mouse.
+rueda de gestos · clic derecho (mantener) señalar · V (mantener) hablar · Esc menú de pausa
+(opciones, libera el mouse; no pausa la partida).
+
+**Probar la voz en una sola PC**: lanzar una instancia con `-- --voz-prueba` (Depurar → Personalizar
+instancias de ejecución → argumentos) o marcar "Voz de prueba en bucle" en Opciones (solo debug).
+Esa instancia habla sola con un "bla-bla" sintético. Con 3 instancias en la misma PC, todas leen el
+mismo micrófono real: conviene usar la voz de prueba en una y "Pulsar para hablar" en las demás.
 
 ## Decisiones tomadas
 
@@ -136,7 +155,10 @@ rueda de gestos · clic derecho (mantener) señalar · Esc liberar el mouse.
 - Los `NoiseEvent` se envían **solo al Ciego**, por RPC no confiable.
 - Las **rondas no terminan**: se rota (Mudo → Sordo → Ciego → Mudo) y se reinicia el cuarto
   indefinidamente. En 3 rondas cada uno jugó los 3 roles.
-- Mientras no haya audio, el Sordo y el Ciego tienen que hablar por fuera (Discord o en persona).
+- **La voz del Ciego no la oye nadie** en partidas de 3 (el Mudo y el Sordo no reciben voz); igual
+  mueve su boca y genera siluetas para él mismo.
+- **Pulsar para hablar (V) es el modo por defecto**; el micrófono abierto usa un umbral de volumen
+  más la probabilidad de voz de RNNoise, con 0.5 s de gracia para no cortar finales de palabra.
 
 ## Hito 1 — Rebanada jugable (sin voz) ✅ completo
 
@@ -159,14 +181,21 @@ Pendiente o para observar al probar con amigos:
   (`silueta.gdshader`), alcance de pasos (`pasos.gd`), empujón al fallar (`puzzle_botones.gd`).
 - Si dos jugadores quedan exactamente encimados, sus cápsulas se empujan hacia arriba sin fin.
   No debería pasar en juego normal; si pasa, separarlos un poco al detectarlo.
-- No hay efectos de sonido todavía.
+- No hay efectos de sonido todavía (sigue pendiente decidir si Mudo/Sordo los oyen).
 
-## Hito 2 — Voz por proximidad
+## Hito 2 — Voz por proximidad ✅ completo (falta probarlo con amigos)
 
-1. Captura de micrófono y transmisión por red.
-2. Reproducción posicional con `AudioStreamPlayer3D` en cada jugador.
-3. Reglas por rol (Mudo sin micro, Mudo y Sordo sin recibir voz).
-4. La voz genera `NoiseEvent` para el Ciego.
+1. ✅ Captura de micrófono y transmisión por red (Opus ~14–20 kbps, solo hacia los Ciegos).
+2. ✅ Reproducción posicional con `AudioStreamPlayer3D` en cada jugador.
+3. ✅ Reglas por rol (Mudo sin micro, Mudo y Sordo sin recibir voz); se actualizan al rotar.
+4. ✅ La voz genera `NoiseEvent` para el Ciego.
+5. ✅ Boca que se abre según el volumen, visible para todos.
+6. ✅ Opciones: micrófono, volumen de entrada (con medidor) y salida, modo abierto o pulsar (V).
+   En el menú principal y en el menú de pausa (Esc).
+7. ✅ Modo debug con voz de prueba en bucle.
+
+Costo medido: ~2 % de un núcleo mientras el micrófono está encendido (RNNoise es lo más caro).
+Solo están los binarios de Windows de TwoVoIP; para otras plataformas, copiarlos del zip de v6.5.
 
 ## Ideas de puzzles (backlog)
 
