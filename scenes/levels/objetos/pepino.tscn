@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/objeto_fisico.gd" id="1_objeto"]
+
+[sub_resource type="BoxShape3D" id="forma_pepino"]
+size = Vector3(0.42, 0.11, 0.11)
+
+[sub_resource type="CapsuleMesh" id="malla_pepino"]
+radius = 0.055
+height = 0.42
+
+[sub_resource type="StandardMaterial3D" id="material_pepino"]
+albedo_color = Color(0.3, 0.55, 0.15, 1)
+
+[sub_resource type="SceneReplicationConfig" id="config_sincronizacion"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:sostenido_por")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+
+[node name="pepino" type="RigidBody3D"]
+collision_layer = 4
+collision_mask = 7
+mass = 0.3
+freeze_mode = 1
+script = ExtResource("1_objeto")
+
+[node name="colision" type="CollisionShape3D" parent="."]
+shape = SubResource("forma_pepino")
+
+[node name="malla" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("malla_pepino")
+surface_material_override/0 = SubResource("material_pepino")
+
+[node name="sincronizador" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("config_sincronizacion")

@@ -1,0 +1,246 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/net/spawner_jugadores.gd" id="1_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/levels/objetos/caja.tscn" id="2_caja"]
+[ext_resource type="PackedScene" path="res://scenes/levels/objetos/perilla.tscn" id="3_perilla"]
+[ext_resource type="Script" path="res://scripts/puzzles/puzzle_caja_fuerte.gd" id="4_puzzle"]
+[ext_resource type="Script" path="res://scripts/roles/siluetas.gd" id="5_siluetas"]
+[ext_resource type="Script" path="res://scripts/net/control_rondas.gd" id="6_rondas"]
+[ext_resource type="Script" path="res://scenes/ui/aviso_ronda.gd" id="7_aviso"]
+
+[sub_resource type="Environment" id="entorno"]
+background_mode = 1
+background_color = Color(0.65, 0.6, 0.55, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.85, 0.8, 0.8, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="material_suelo"]
+albedo_color = Color(0.35, 0.3, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_pared"]
+albedo_color = Color(0.7, 0.55, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_caja_fuerte"]
+albedo_color = Color(0.25, 0.32, 0.3, 1)
+metallic = 0.5
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="material_puerta"]
+albedo_color = Color(0.3, 0.38, 0.36, 1)
+metallic = 0.5
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="material_pedestal"]
+albedo_color = Color(0.45, 0.4, 0.38, 1)
+
+[sub_resource type="CapsuleMesh" id="malla_premio"]
+radius = 0.07
+height = 0.45
+
+[sub_resource type="StandardMaterial3D" id="material_premio"]
+albedo_color = Color(1, 0.78, 0.15, 1)
+metallic = 0.9
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.5, 0.35, 0.05, 1)
+
+[node name="cuarto_caja_fuerte" type="Node3D"]
+
+[node name="entorno" type="WorldEnvironment" parent="."]
+environment = SubResource("entorno")
+
+[node name="sol" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8253, 0, -0.5646, -0.4423, 0.6216, -0.6465, 0.351, 0.7833, 0.513, 0, 6, 0)
+light_energy = 0.9
+
+[node name="geometria" type="Node3D" parent="."]
+
+[node name="suelo" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(12, 1, 12)
+material = SubResource("material_suelo")
+
+[node name="pared_norte" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -6.25)
+use_collision = true
+size = Vector3(12, 3, 0.5)
+material = SubResource("material_pared")
+
+[node name="pared_sur" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 6.25)
+use_collision = true
+size = Vector3(12, 3, 0.5)
+material = SubResource("material_pared")
+
+[node name="pared_este" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 1.5, 0)
+use_collision = true
+size = Vector3(0.5, 3, 13)
+material = SubResource("material_pared")
+
+[node name="pared_oeste" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 1.5, 0)
+use_collision = true
+size = Vector3(0.5, 3, 13)
+material = SubResource("material_pared")
+
+[node name="pedestal" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.175, -5.2)
+use_collision = true
+size = Vector3(1.7, 0.35, 1.4)
+material = SubResource("material_pedestal")
+
+[node name="caja_fuerte" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, -5.2)
+use_collision = true
+size = Vector3(1.4, 1.2, 1.2)
+material = SubResource("material_caja_fuerte")
+
+[node name="interior" type="CSGBox3D" parent="geometria/caja_fuerte"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.1)
+operation = 2
+size = Vector3(1.2, 1.0, 1.1)
+material = SubResource("material_caja_fuerte")
+
+[node name="premio" type="MeshInstance3D" parent="geometria"]
+transform = Transform3D(0, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0.53, -5.25)
+mesh = SubResource("malla_premio")
+surface_material_override/0 = SubResource("material_premio")
+
+[node name="puzzle_caja_fuerte" type="Node3D" parent="." node_paths=PackedStringArray("perilla", "bisagra", "nota")]
+script = ExtResource("4_puzzle")
+perilla = NodePath("bisagra/perilla")
+bisagra = NodePath("bisagra")
+nota = NodePath("nota")
+
+[node name="bisagra" type="Node3D" parent="puzzle_caja_fuerte"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 0.95, -4.58)
+
+[node name="puerta" type="CSGBox3D" parent="puzzle_caja_fuerte/bisagra"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, 0.04)
+use_collision = true
+size = Vector3(1.38, 1.18, 0.08)
+material = SubResource("material_puerta")
+
+[node name="perilla" parent="puzzle_caja_fuerte/bisagra" node_paths=PackedStringArray("pista") instance=ExtResource("3_perilla")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.05, 0.08)
+pista = NodePath("../../../interfaz/pista_perilla")
+
+[node name="nota" type="Label3D" parent="puzzle_caja_fuerte"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, -5.95)
+layers = 2
+pixel_size = 0.0035
+modulate = Color(1, 0.85, 0.15, 1)
+outline_modulate = Color(0, 0, 0, 1)
+text = "Combinación"
+font_size = 64
+outline_size = 16
+
+[node name="letrero" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, -5.98)
+pixel_size = 0.003
+modulate = Color(0.2, 0.12, 0.1, 1)
+outline_size = 0
+text = "Solo el CIEGO puede girar la perilla"
+font_size = 64
+
+[node name="objetos" type="Node3D" parent="."]
+
+[node name="caja_1" parent="objetos" instance=ExtResource("2_caja")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.25, -1)
+
+[node name="caja_2" parent="objetos" instance=ExtResource("2_caja")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.25, 0.5)
+
+[node name="puntos_aparicion" type="Node3D" parent="."]
+
+[node name="punto_1" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 4)
+
+[node name="punto_2" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+
+[node name="punto_3" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 4)
+
+[node name="jugadores" type="Node3D" parent="."]
+
+[node name="spawner_jugadores" type="MultiplayerSpawner" parent="." node_paths=PackedStringArray("puntos_aparicion")]
+spawn_path = NodePath("../jugadores")
+script = ExtResource("1_spawner")
+puntos_aparicion = NodePath("../puntos_aparicion")
+
+[node name="siluetas" type="Node" parent="."]
+script = ExtResource("5_siluetas")
+
+[node name="control_rondas" type="Node" parent="." node_paths=PackedStringArray("puzzle", "spawner", "aviso")]
+script = ExtResource("6_rondas")
+puzzle = NodePath("../puzzle_caja_fuerte")
+spawner = NodePath("../spawner_jugadores")
+aviso = NodePath("../interfaz/aviso_ronda")
+
+[node name="interfaz" type="CanvasLayer" parent="."]
+
+[node name="aviso_ronda" type="Control" parent="interfaz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_aviso")
+
+[node name="centro" type="CenterContainer" parent="interfaz/aviso_ronda"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 40.0
+offset_bottom = 260.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="columna" type="VBoxContainer" parent="interfaz/aviso_ronda/centro"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="titulo" type="Label" parent="interfaz/aviso_ronda/centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 56
+horizontal_alignment = 1
+
+[node name="subtitulo" type="Label" parent="interfaz/aviso_ronda/centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="pista_perilla" type="Label" parent="interfaz"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -350.0
+offset_top = -90.0
+offset_right = 350.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1

@@ -21,6 +21,12 @@ func _ready() -> void:
 	for modo in MODOS:
 		_modo.add_item(MODOS[modo], modo)
 	_voz_prueba.visible = OS.is_debug_build()
+	if Entrada.es_tactil():
+		# Más alto para el dedo; y en el teléfono no hay tecla V.
+		for control: Control in [_microfono, _entrada, _salida, _modo]:
+			control.custom_minimum_size.y = 40.0
+		_modo.set_item_text(_modo.get_item_index(Microfono.Modo.PULSAR),
+			"Pulsar para hablar (botón Hablar)")
 	_microfono.item_selected.connect(func(i: int) -> void:
 		Opciones.poner(&"dispositivo_entrada", _microfono.get_item_text(i)))
 	_entrada.value_changed.connect(func(v: float) -> void: Opciones.poner(&"volumen_entrada", v))
@@ -66,5 +72,7 @@ func _process(_delta: float) -> void:
 	_aviso_micro.visible = sin_codec or fallo
 	if sin_codec:
 		_aviso_micro.text = "Voz no disponible (falta la extensión TwoVoIP)"
+	elif Microfono.error_dispositivo() == ERR_UNAUTHORIZED:
+		_aviso_micro.text = "Falta el permiso del micrófono: dáselo al juego en los ajustes del teléfono"
 	elif fallo:
 		_aviso_micro.text = "No se pudo abrir el micrófono"

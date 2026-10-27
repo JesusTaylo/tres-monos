@@ -16,7 +16,7 @@ var _reserva := TCPServer.new()
 
 
 func _ready() -> void:
-	if not OS.is_debug_build() or DisplayServer.get_name() == "headless":
+	if not OS.is_debug_build() or DisplayServer.get_name() == "headless" or OS.has_feature("mobile"):
 		return
 	# Si el editor incrusta el juego en su pestaña, no se mueve la ventana.
 	if OS.has_feature("embedded_in_editor"):

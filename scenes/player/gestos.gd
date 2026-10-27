@@ -39,7 +39,9 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+	if Entrada.es_mouse_de_toque(event):
+		return
+	if not Entrada.jugando():
 		_cerrar_rueda(false)
 		apuntando = false
 		return
@@ -47,8 +49,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_abrir_rueda()
 	elif event.is_action_released("gestos"):
 		_cerrar_rueda(true)
-	elif rueda.abierta and event is InputEventMouseMotion:
-		# Con la rueda abierta, el mouse elige gesto en vez de mover la cámara.
+	elif rueda.abierta and (event is InputEventMouseMotion or event is InputEventScreenDrag):
+		# Con la rueda abierta, el mouse (o el dedo que sostiene "Gestos") elige
+		# gesto en vez de mover la cámara.
 		_direccion_rueda = (_direccion_rueda + event.relative).limit_length(RuedaGestos.RADIO)
 		rueda.seleccion = rueda.indice_para(_direccion_rueda)
 		get_viewport().set_input_as_handled()

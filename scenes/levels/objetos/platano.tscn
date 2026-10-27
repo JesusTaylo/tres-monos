@@ -1,0 +1,82 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/objeto_fisico.gd" id="1_objeto"]
+
+[sub_resource type="BoxShape3D" id="forma_platano"]
+size = Vector3(0.42, 0.11, 0.12)
+
+[sub_resource type="CapsuleMesh" id="malla_mitad"]
+radius = 0.055
+height = 0.24
+
+[sub_resource type="StandardMaterial3D" id="material_platano"]
+albedo_color = Color(0.95, 0.82, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="malla_punta"]
+size = Vector3(0.03, 0.03, 0.03)
+
+[sub_resource type="StandardMaterial3D" id="material_punta"]
+albedo_color = Color(0.25, 0.18, 0.08, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_marca"]
+cull_mode = 1
+shading_mode = 0
+albedo_color = Color(0.2, 1, 0.35, 1)
+
+[sub_resource type="SceneReplicationConfig" id="config_sincronizacion"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:sostenido_por")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+
+[node name="platano" type="RigidBody3D" groups=["platanos"]]
+collision_layer = 4
+collision_mask = 7
+mass = 0.3
+freeze_mode = 1
+script = ExtResource("1_objeto")
+
+[node name="colision" type="CollisionShape3D" parent="."]
+shape = SubResource("forma_platano")
+
+[node name="malla" type="Node3D" parent="."]
+
+[node name="mitad_izquierda" type="MeshInstance3D" parent="malla"]
+transform = Transform3D(0.2588, -0.9659, 0, 0.9659, 0.2588, 0, 0, 0, 1, -0.095, 0.01, 0)
+mesh = SubResource("malla_mitad")
+surface_material_override/0 = SubResource("material_platano")
+
+[node name="mitad_derecha" type="MeshInstance3D" parent="malla"]
+transform = Transform3D(0.2588, 0.9659, 0, -0.9659, 0.2588, 0, 0, 0, 1, 0.095, 0.01, 0)
+mesh = SubResource("malla_mitad")
+surface_material_override/0 = SubResource("material_platano")
+
+[node name="punta" type="MeshInstance3D" parent="malla"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.045, 0)
+mesh = SubResource("malla_punta")
+surface_material_override/0 = SubResource("material_punta")
+
+[node name="marca" type="Node3D" parent="."]
+visible = false
+
+[node name="contorno_izquierdo" type="MeshInstance3D" parent="marca"]
+transform = Transform3D(0.3624, -1.3523, 0, 1.3523, 0.3624, 0, 0, 0, 1.4, -0.095, 0.01, 0)
+layers = 2
+cast_shadow = 0
+mesh = SubResource("malla_mitad")
+surface_material_override/0 = SubResource("material_marca")
+
+[node name="contorno_derecho" type="MeshInstance3D" parent="marca"]
+transform = Transform3D(0.3624, 1.3523, 0, -1.3523, 0.3624, 0, 0, 0, 1.4, 0.095, 0.01, 0)
+layers = 2
+cast_shadow = 0
+mesh = SubResource("malla_mitad")
+surface_material_override/0 = SubResource("material_marca")
+
+[node name="sincronizador" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("config_sincronizacion")

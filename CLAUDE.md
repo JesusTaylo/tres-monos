@@ -23,6 +23,8 @@ Cadena de información: **Mudo → (gestos) → Sordo → (voz) → Ciego → (a
 ## Tecnología
 
 - **Motor:** Godot 4 (versión estable más reciente), **GDScript**.
+- **Plataformas:** Windows (x86_64) y **Android** (arm64, horizontal). Mismo proyecto y misma red:
+  PC y teléfonos pueden jugar juntos en la misma red local.
 - **Renderer:** `Compatibility` o `Mobile`. El desarrollador trabaja en una laptop con gráfica
   integrada: mantener el rendimiento ligero (low-poly, pocas luces dinámicas, sin efectos pesados).
 - **Red:** API de multijugador de alto nivel de Godot (`ENetMultiplayerPeer`,
@@ -52,7 +54,8 @@ Cámaras por rol:
 Audio por rol:
 - **Mudo y Sordo:** no reciben audio de voz de nadie.
 - **Mudo:** micrófono desactivado.
-- Pendiente de decidir: si Mudo/Sordo oyen efectos de sonido del juego o silencio total.
+- Efectos de sonido: **solo los oye el Ciego** (igual que la voz). La regla vive en
+  `Sonidos.puede_oir()`; cambiarla ahí si se decide que Mudo/Sordo también los oigan.
 
 ## Gestos del Mudo
 
@@ -73,7 +76,7 @@ aparte, con clic derecho mantenido**, para apuntar en vivo. Faltan: más, menos,
 ```
 /assets         modelos, texturas, sonidos que agrega el desarrollador (no renombrar sin avisar)
 /scenes
-  /main         menú, lobby
+  /main         menú, lobby, pantalla final
   /player       jugador, cámaras por rol, gestos
   /levels       cuartos de puzzles
   /ui
@@ -105,7 +108,7 @@ aparte, con clic derecho mantenido**, para apuntar en vivo. Faltan: más, menos,
 | Nombre | Archivo | Responsabilidad |
 |---|---|---|
 | `Red` | `scripts/net/red.gd` | ENet host/cliente, saludo de autenticación, señales de conexión |
-| `Lobby` | `scripts/net/lobby.gd` | Jugadores, roles, rotación y cambios de escena (menú ↔ lobby ↔ nivel) |
+| `Lobby` | `scripts/net/lobby.gd` | Jugadores, roles, rotación, progresión de pruebas y cambios de escena (menú ↔ lobby ↔ pruebas ↔ pantalla final) |
 | `Ruido` | `scripts/systems/ruido.gd` | Emite `NoiseEvent` y los entrega solo al Ciego |
 | `Microfono` | `scripts/voz/microfono.gd` | Lee el micrófono (o la voz de prueba), decide si se habla, entrega paquetes Opus |
 | `Opciones` | `scripts/systems/opciones.gd` | Opciones de audio; aplica y guarda en `user://opciones.cfg` |
@@ -120,12 +123,51 @@ aparte, con clic derecho mantenido**, para apuntar en vivo. Faltan: más, menos,
   ("La partida está llena", "La partida ya empezó") antes de que el peer cuente como conectado.
 - Al entrar a un nivel, el host espera a que todos lo carguen (`Lobby.todos_cargaron`) antes de crear
   jugadores y de activar la replicación de los objetos (sus sincronizadores empiezan ocultos).
-- Al salir de un nivel hay una salida ordenada con pausas: dejar de sincronizar → borrar jugadores →
-  cambiar de escena. Así ningún peer recibe paquetes de nodos ya borrados.
+- Al salir de un nivel hay una salida ordenada con pausas (`Lobby._salida_ordenada`): dejar de
+  sincronizar → borrar jugadores → cambiar de escena. Así ningún peer recibe paquetes de nodos ya
+  borrados. Se usa al pasar de prueba, al ir a la pantalla final y al volver al lobby.
 - Si alguien se desconecta a mitad de partida, todos vuelven al lobby y se borran los roles.
+- **Por internet**: no hay servidor propio. El host corre un túnel UDP (playit.gg) hacia su puerto
+  7777 y pasa la dirección; "Unirse" acepta `ip`, `nombre` o `nombre:puerto` (`Red.separar_direccion`).
+  Los nombres se resuelven sin congelar (`Red.resolver`; uno inexistente tarda ~11 s en fallar).
 
 **Interfaz de un puzzle** (para `control_rondas.gd`): señal `resuelto` (emitida en el host) y método
 `reiniciar()`. Cada nivel tiene un nodo `control_rondas`, uno `siluetas` y un `spawner_jugadores`.
+
+**Progresión de pruebas**: `Lobby.PRUEBAS` es la lista ordenada (nombre + escena):
+1 Botones → 2 Plátano → 3 Piso → 4 Caja fuerte. Al resolverse un puzzle, `control_rondas` celebra 3 s
+y llama a `Lobby.avanzar_prueba()`: salida ordenada → rotar roles (sin jugadores en escena) → cargar
+la siguiente prueba, o `scenes/main/pruebas_completadas.tscn` después de la última. Esa pantalla
+muestra lo que tardaron en cada prueba (`Lobby.tiempos`) y a los 12 s (o con el botón del host)
+`Lobby.terminar_partida()` devuelve a todos al lobby con los roles ya rotados. Si un nivel se abre
+suelto (F6, sin partida), al resolverse se reinicia el mismo cuarto. **Debug**: en el lobby el host ve
+un selector "Empezar en: …" para saltar directo a cualquier prueba (solo en builds de debug).
+Para agregar una prueba: escena en `scenes/levels/` con los tres nodos de arriba y una entrada en
+`Lobby.PRUEBAS`.
+
+**Pruebas 2–4** (lógica en `scripts/puzzles/`; todo lo decide el host y lo manda por RPC):
+- `puzzle_platano.gd` (`cuarto_platano.tscn`): 5 plátanos + limón + pepino (`ObjetoFisico`). El
+  bueno se elige al azar y tiene un contorno verde en la capa OBJETIVO (nodo `marca`). La ranura es un
+  `Area3D`: solo cuenta si la fruta la sostiene el Ciego al entrar; la equivocada hace confeti
+  (`Confeti`) + pedorreta y vuelve a la mesa; si la mete otro rol, vuelve a la mesa sin más.
+- `puzzle_piso.gd` (`cuarto_piso.tscn`): 6×8 baldosas creadas por código (iguales en todos los peers,
+  no se replican). Camino seguro al azar (avanza fila a fila con desvíos laterales), marcado con placas
+  en la capa OBJETIVO. El host vigila la posición de cada jugador: baldosa falsa pisada → cae (RPC) y
+  vuelve a los 3 s. **El piso solo aguanta al Ciego**: bajo los demás se cae cualquier baldosa (si no,
+  el Mudo cruzaría mostrando el camino). Quien cae da vueltas (`scenes/player/ragdoll_jugador.gd`,
+  animación barata, no física) y el host lo devuelve al inicio con `Jugador.teletransportar`.
+- `puzzle_caja_fuerte.gd` + `perilla.gd` (`cuarto_caja_fuerte.tscn`): combinación de 3 números 0–20
+  (cada uno a 3+ pasos del anterior). El Ciego toma la perilla (E / "Agarrar") y la gira con A/D o el
+  joystick (`Jugador.inmovil` lo deja quieto mientras tanto); E otra vez la suelta. El número y la
+  marca del pomo están en la capa OBJETIVO, la combinación en una nota OBJETIVO sobre la caja. Hace
+  "clic" (+ `NoiseEvent`) cuando la perilla **se queda 0.6 s** en el número que toca (`ESPERA_CLIC`;
+  así no se resuelve girando sin parar). Pasarse no reinicia nada.
+
+**Efectos de sonido**: `scripts/systems/sonidos.gd` (`Sonidos`, estático) los sintetiza al vuelo
+(clic, tic, crujido, pedorreta, silbido de caída, éxito) porque aún no hay assets de audio; bus
+"Efectos". Quien produce el sonido lo manda por RPC a todos y cada peer decide si lo oye.
+`scripts/systems/confeti.gd`: `CPUParticles3D` de un disparo (ojo: con `one_shot` hay que llamar
+`restart()` después de agregarlo al árbol, si no no arranca).
 
 **Voz**: `scripts/voz/codec_voz.gd` es el **único** archivo que conoce TwoVoIP (crea sus clases con
 `ClassDB.instantiate`, así el resto compila aunque falte la extensión). Para cambiar de códec,
@@ -136,27 +178,57 @@ El volumen con que habla cada uno (`nivel_voz`) se replica aparte para la boca, 
 
 **Controles**: WASD caminar · Espacio saltar · E / clic agarrar, soltar y presionar · Q (mantener)
 rueda de gestos · clic derecho (mantener) señalar · V (mantener) hablar · Esc menú de pausa
-(opciones, libera el mouse; no pausa la partida).
+(opciones, libera el mouse; no pausa la partida). Con la perilla tomada: A/D (o joystick) girar.
+
+**Entrada (PC y teléfono)**: `scripts/systems/entrada.gd` (`Entrada`, estático) decide si se juega con
+mouse y teclado o táctil, y si se está "jugando" (fuera de menús). En táctil Godot convierte cada toque
+en un clic de mouse falso: los controles de juego lo ignoran con `Entrada.es_mouse_de_toque()`.
+`scenes/ui/controles_tactiles.gd` (en el HUD del jugador): joystick a la izquierda, arrastrar a la
+derecha para mirar (`Jugador.mirar`), y `TouchScreenButton` (multitáctil) que mandan las **mismas
+acciones** que las teclas (saltar, agarrar, gestos, senalar, hablar, liberar_mouse). Para probar el
+modo táctil en PC: lanzar con `-- --tactil`.
 
 **Probar la voz en una sola PC**: lanzar una instancia con `-- --voz-prueba` (Depurar → Personalizar
 instancias de ejecución → argumentos) o marcar "Voz de prueba en bucle" en Opciones (solo debug).
 Esa instancia habla sola con un "bla-bla" sintético. Con 3 instancias en la misma PC, todas leen el
 mismo micrófono real: conviene usar la voz de prueba en una y "Pulsar para hablar" en las demás.
 
+## Exportar
+
+Presets en `export_presets.cfg` (sin contraseñas): "Windows Desktop" y "Android".
+```
+godot --headless --export-release "Windows Desktop" build/windows/MonkeySeeMonkeyDont.exe
+godot --headless --export-release "Android" build/android/MonkeySeeMonkeyDont.apk
+```
+- Plantillas de exportación 4.7.2 instaladas solo para Windows y Android
+  (`%APPDATA%\Godot\export_templates\4.7.2.stable\`).
+- Android: Java 17 en `%LOCALAPPDATA%\Programs\Java\jdk-17…` y SDK en `%LOCALAPPDATA%\Android\Sdk`
+  (platform-tools, build-tools 35.0.1, platforms android-35). Godot toma la ruta de Java de la
+  configuración del editor (Exportar → Android → Java SDK Path), no de `JAVA_HOME`.
+- **Llave de firma de Android: `%USERPROFILE%\.android-keystores\monkeysee.keystore`** (alias
+  `monkeysee`; la contraseña está en `monkeysee-LEEME.txt` al lado). **Fuera del repo y no se pierde**:
+  sin ella las actualizaciones no se instalan encima. Para exportar desde la terminal se pasa con
+  `GODOT_ANDROID_KEYSTORE_RELEASE_PATH`, `GODOT_ANDROID_KEYSTORE_RELEASE_USER` y
+  `GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD`. Al publicar una versión nueva, subir `version/code`.
+- `distribucion/LEEME.txt` va dentro del zip de Windows (y explica cómo instalar el APK).
+
 ## Decisiones tomadas
 
 - **Todos los roles pueden hacer gestos**, no solo el Mudo: el Mudo tampoco oye, así que el Sordo
   necesita contestarle con gestos. Restringirlo es una condición en `gestos.gd`.
 - **Señalar va con clic derecho**, fuera de la rueda, para apuntar en vivo.
-- **Solo las pulsaciones del Ciego cuentan** en el puzzle de botones; si no, el Mudo lo resolvería solo.
+- **Solo las acciones del Ciego cuentan** en todas las pruebas (pulsar botones, entregar la fruta,
+  cruzar el piso, girar la perilla); si no, el Mudo las resolvería solo.
 - **Fallar el puzzle lanza al Ciego hacia atrás** (comedia) y reinicia el progreso.
 - El **Sordo ve con niebla ligera**. El **Ciego ve negro**; las siluetas usan un shader que ilumina lo
   cercano a cada ruido (hasta 16 ruidos a la vez) y se desvanece en 1.6 s. El objetivo nunca tiene silueta.
 - Los `NoiseEvent` se envían **solo al Ciego**, por RPC no confiable.
-- Las **rondas no terminan**: se rota (Mudo → Sordo → Ciego → Mudo) y se reinicia el cuarto
-  indefinidamente. En 3 rondas cada uno jugó los 3 roles.
+- La partida es una **serie de 4 pruebas en orden**; entre prueba y prueba se rota
+  (Mudo → Sordo → Ciego → Mudo). Al terminar la cuarta: pantalla "¡Pruebas completadas!" y al lobby.
 - **La voz del Ciego no la oye nadie** en partidas de 3 (el Mudo y el Sordo no reciben voz); igual
   mueve su boca y genera siluetas para él mismo.
+- **Android: solo arm64, horizontal y en pantalla completa**; controles = joystick + arrastrar para mirar.
+  Los gestos en el teléfono: mantener "Gestos" y deslizar el mismo dedo hacia la opción.
 - **Pulsar para hablar (V) es el modo por defecto**; el micrófono abierto usa un umbral de volumen
   más la probabilidad de voz de RNNoise, con 0.5 s de gracia para no cortar finales de palabra.
 
@@ -181,7 +253,7 @@ Pendiente o para observar al probar con amigos:
   (`silueta.gdshader`), alcance de pasos (`pasos.gd`), empujón al fallar (`puzzle_botones.gd`).
 - Si dos jugadores quedan exactamente encimados, sus cápsulas se empujan hacia arriba sin fin.
   No debería pasar en juego normal; si pasa, separarlos un poco al detectarlo.
-- No hay efectos de sonido todavía (sigue pendiente decidir si Mudo/Sordo los oyen).
+- Los efectos de sonido son sintéticos y provisorios (ver `Sonidos`).
 
 ## Hito 2 — Voz por proximidad ✅ completo (falta probarlo con amigos)
 
@@ -197,11 +269,27 @@ Pendiente o para observar al probar con amigos:
 Costo medido: ~2 % de un núcleo mientras el micrófono está encendido (RNNoise es lo más caro).
 Solo están los binarios de Windows de TwoVoIP; para otras plataformas, copiarlos del zip de v6.5.
 
+## Hito 3 — Pruebas 2–4 y progresión ✅ completo (falta probarlo con amigos)
+
+1. ✅ Prueba 2, entrega de plátano (confeti y sonido ridículo al equivocarse).
+2. ✅ Prueba 3, piso traicionero (baldosas que caen y vuelven, ragdoll simple, reaparición).
+3. ✅ Prueba 4, caja fuerte (perilla con teclado y joystick, clic audible, la puerta se abre).
+4. ✅ Progresión 1 → 4 con rotación de roles, pantalla final con tiempos y vuelta al lobby.
+5. ✅ Selector de debug en el lobby para empezar en cualquier prueba.
+
+Para observar al probar: si la perilla es cómoda en el teléfono (`Perilla.UMBRAL`, repetición), si
+0.6 s de espera para el clic es mucho o poco, cuán largo es el camino del piso (`DESVIO_MAXIMO`) y si
+hace falta que el piso también aguante al Sordo.
+
+## Port a Android ✅ hecho (falta probarlo en teléfonos reales)
+
+APK firmado de 33 MB con voz (TwoVoIP arm64) y permisos de internet y micrófono. Controles táctiles
+probados en PC con toques simulados; nunca se corrió en un teléfono real todavía.
+
 ## Ideas de puzzles (backlog)
 
 - Armar un mueble con piezas que solo el Mudo distingue.
 - Cortar el cable correcto de una bomba.
 - Cocinar una receta (el Ciego echa ingredientes).
-- Cruzar un piso con baldosas que se caen.
 - Darle de comer a un animal que puede atacar.
 - Cargar entre todos un objeto frágil por un pasillo.

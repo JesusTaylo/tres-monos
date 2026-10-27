@@ -1,0 +1,76 @@
+MONKEY SEE, MONKEY DON'T  (versión de prueba 0.2.0)
+=================================================
+
+Juego cooperativo de comedia para 3 jugadores. Uno no ve, uno no oye y uno no
+habla: tienen que resolver el puzzle pasándose la información como puedan.
+
+
+CÓMO EMPEZAR
+------------
+1. Descomprimir la carpeta completa (el .exe necesita la .dll que está al lado).
+2. Abrir MonkeySeeMonkeyDont.exe.
+3. Uno pulsa "Hospedar". Los otros dos escriben la IP que le aparece al host
+   en el lobby y pulsan "Unirse".
+4. Con los 3 adentro, el host pulsa "Asignar roles" y luego "Empezar".
+
+Si Windows muestra "Windows protegió su PC": "Más información" -> "Ejecutar de
+todas formas". Aparece porque el juego no está firmado digitalmente.
+
+La primera vez que alguien hospeda, Windows pregunta si permite el acceso a la
+red: hay que aceptar (redes privadas). El juego usa el puerto 7777 (UDP).
+
+Si no están en la misma red (cada uno en su casa), lo más fácil es usar una
+red virtual como Tailscale o Radmin VPN y usar la IP que esa red le da al host.
+
+
+EN TELÉFONOS ANDROID
+--------------------
+1. Pasar el archivo MonkeySeeMonkeyDont-0.2.0.apk al teléfono (WhatsApp a uno
+   mismo, Google Drive o cable USB) y tocarlo para instalarlo.
+2. Si pide permiso para "instalar apps desconocidas", darlo a la app desde la
+   que se abrió el archivo (Archivos, Chrome, WhatsApp...).
+3. Si Play Protect avisa que la app no es conocida: "Más detalles" ->
+   "Instalar de todas formas". Aparece porque no viene de la Play Store.
+4. La primera vez que se use la voz, el juego pide permiso para el micrófono.
+
+Todos tienen que estar en la misma red Wi-Fi. Las redes "de invitados" de
+algunos routers no dejan que los teléfonos se vean entre sí: usar la red
+principal. Se puede mezclar: unos en teléfono y otros en PC.
+
+Controles en el teléfono: joystick a la izquierda para caminar, arrastrar el
+dedo en la derecha para mirar, y botones para Saltar, Agarrar, Gestos
+(mantener y deslizar el dedo hacia el gesto), Señalar y Hablar (mantener).
+"Menú" (arriba a la derecha) abre las opciones.
+
+
+LOS ROLES
+---------
+- MUDO: ve todo, incluido el objetivo. No oye ni habla: solo gestos.
+- SORDO: ve a los demás pero NO el objetivo. No oye: interpreta los gestos
+  del Mudo y se los dice en voz alta al Ciego.
+- CIEGO: no ve casi nada, solo siluetas cuando algo hace ruido. Escucha al
+  Sordo y es el único que puede presionar los botones.
+
+Al resolver el puzzle, los roles rotan.
+
+
+CONTROLES
+---------
+WASD .................. caminar
+Espacio ............... saltar
+Mouse ................. mirar
+E / clic izquierdo .... agarrar, soltar, presionar botones
+Q (mantener) .......... rueda de gestos (mover el mouse y soltar)
+Clic derecho (mant.) .. señalar
+V (mantener) .......... hablar (si está en "Pulsar para hablar")
+Esc ................... menú de pausa y opciones (la partida sigue)
+
+
+VOZ
+---
+En Opciones (menú principal o Esc en partida) se elige el micrófono, los
+volúmenes y el modo: "Pulsar para hablar (V)" o "Micrófono abierto".
+La voz se oye más fuerte de cerca. Solo el Ciego oye voces.
+
+
+Licencias de terceros: ver la carpeta "licencias".

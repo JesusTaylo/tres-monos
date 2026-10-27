@@ -9,8 +9,14 @@ const VELOCIDAD_SALTO := 4.5
 const ACELERACION_SUELO := 12.0
 const ACELERACION_AIRE := 3.0
 const SENSIBILIDAD_MOUSE := 0.0025
+## Radianes por píxel al arrastrar el dedo (controles táctiles).
+const SENSIBILIDAD_TACTIL := 0.006
 ## Límite para mirar arriba/abajo (~85°).
 const LIMITE_CABEZA := 1.48
+
+## Si es true, el jugador no camina ni salta (p. ej. mientras sostiene la perilla
+## de la caja fuerte, que usa las mismas teclas para girar). Solo en el dueño.
+var inmovil := false
 
 var _gravedad: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -38,9 +44,11 @@ func _ready() -> void:
 	$modelo.visible = not es_mio
 	$cabeza/cara.visible = not es_mio
 	$hud.visible = es_mio
+	# En el teléfono los botones ya dicen qué hacen; la ayuda de teclas sobra.
+	$hud/ayuda.visible = not Entrada.es_tactil()
 	set_physics_process(es_mio)
 	set_process_unhandled_input(es_mio)
-	if es_mio:
+	if es_mio and not Entrada.es_tactil():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
@@ -49,11 +57,18 @@ func _exit_tree() -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
+## Gira la vista. `giro` en radianes (x = horizontal, y = vertical).
+## Lo usan el mouse y el arrastre de los controles táctiles.
+func mirar(giro: Vector2) -> void:
+	rotate_y(-giro.x)
+	cabeza.rotation.x = clampf(cabeza.rotation.x - giro.y, -LIMITE_CABEZA, LIMITE_CABEZA)
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if Entrada.es_mouse_de_toque(event):
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * SENSIBILIDAD_MOUSE)
-		cabeza.rotation.x = clampf(cabeza.rotation.x - event.relative.y * SENSIBILIDAD_MOUSE,
-			-LIMITE_CABEZA, LIMITE_CABEZA)
+		mirar(event.relative * SENSIBILIDAD_MOUSE)
 	elif event.is_action_pressed("liberar_mouse"):
 		# Esc abre/cierra el menú de pausa (libera el mouse; la partida sigue).
 		_menu_pausa.alternar()
@@ -88,11 +103,11 @@ func teletransportar(posicion: Vector3, giro: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= _gravedad * delta
-	elif Input.is_action_just_pressed("saltar") and not _menu_pausa.visible:
+	elif Input.is_action_just_pressed("saltar") and not _menu_pausa.visible and not inmovil:
 		velocity.y = VELOCIDAD_SALTO
 
 	var entrada := Input.get_vector("mover_izquierda", "mover_derecha", "mover_adelante", "mover_atras")
-	if _menu_pausa.visible:
+	if _menu_pausa.visible or inmovil:
 		entrada = Vector2.ZERO
 	var direccion := transform.basis * Vector3(entrada.x, 0.0, entrada.y)
 	var objetivo := direccion * VELOCIDAD

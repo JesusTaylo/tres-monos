@@ -1,5 +1,6 @@
 extends Control
-## Menú principal: Hospedar / Unirse por IP en red local.
+## Menú principal: Hospedar / Unirse por IP (red local) o "dirección:puerto"
+## (por internet, con un túnel como playit.gg).
 ## Solo maneja la interfaz; la conexión la hace el autoload Red.
 ## Pasa al lobby cuando el host lo acepta en el saludo.
 
@@ -11,6 +12,10 @@ const IP_POR_DEFECTO := "127.0.0.1"
 @onready var _boton_cancelar: Button = %boton_cancelar
 @onready var _capa_opciones: Control = %capa_opciones
 @onready var _etiqueta_estado: Label = %etiqueta_estado
+
+## Sube con cada intento de unirse o cancelación; así una búsqueda de
+## dirección que termina tarde sabe que ya no le corresponde conectar.
+var _intento := 0
 
 
 func _ready() -> void:
@@ -38,20 +43,31 @@ func _al_presionar_hospedar() -> void:
 
 
 func _al_presionar_unirse() -> void:
-	var ip := _campo_ip.text.strip_edges()
-	if ip.is_empty():
-		ip = IP_POR_DEFECTO
-	if not ip.is_valid_ip_address():
-		_mostrar_menu("IP inválida: %s" % ip)
+	var texto := _campo_ip.text.strip_edges()
+	if texto.is_empty():
+		texto = IP_POR_DEFECTO
+	var partes := Red.separar_direccion(texto)
+	if partes.is_empty():
+		_mostrar_menu("Dirección inválida: %s" % texto)
 		return
-	var error := Red.unirse(ip)
+	_intento += 1
+	var intento := _intento
+	_mostrar_conectando("Buscando %s..." % partes[0])
+	var ip: String = await Red.resolver(partes[0])
+	if intento != _intento:
+		return  # Se canceló mientras se buscaba.
+	if ip.is_empty():
+		_mostrar_menu("No se encontró la dirección: %s" % partes[0])
+		return
+	var error := Red.unirse(ip, partes[1])
 	if error != OK:
 		_mostrar_menu("No se pudo crear la conexión")
 		return
-	_mostrar_conectando("Conectando a %s..." % ip)
+	_mostrar_conectando("Conectando a %s..." % texto)
 
 
 func _al_presionar_cancelar() -> void:
+	_intento += 1
 	Red.desconectar()
 
 

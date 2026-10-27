@@ -1,0 +1,170 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/net/spawner_jugadores.gd" id="1_spawner"]
+[ext_resource type="Script" path="res://scripts/puzzles/puzzle_piso.gd" id="2_puzzle"]
+[ext_resource type="Script" path="res://scripts/roles/siluetas.gd" id="3_siluetas"]
+[ext_resource type="Script" path="res://scripts/net/control_rondas.gd" id="4_rondas"]
+[ext_resource type="Script" path="res://scenes/ui/aviso_ronda.gd" id="5_aviso"]
+
+[sub_resource type="Environment" id="entorno"]
+background_mode = 1
+background_color = Color(0.5, 0.55, 0.7, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.8, 0.9, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="material_plataforma"]
+albedo_color = Color(0.45, 0.4, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_pared"]
+albedo_color = Color(0.7, 0.68, 0.75, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_pozo"]
+albedo_color = Color(0.08, 0.07, 0.1, 1)
+
+[sub_resource type="StandardMaterial3D" id="material_meta"]
+albedo_color = Color(0.85, 0.75, 0.3, 1)
+
+[node name="cuarto_piso" type="Node3D"]
+
+[node name="entorno" type="WorldEnvironment" parent="."]
+environment = SubResource("entorno")
+
+[node name="sol" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8253, 0, -0.5646, -0.4423, 0.6216, -0.6465, 0.351, 0.7833, 0.513, 0, 6, 0)
+light_energy = 0.9
+
+[node name="geometria" type="Node3D" parent="."]
+
+[node name="inicio" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 7.2)
+use_collision = true
+size = Vector3(7.8, 1, 4)
+material = SubResource("material_plataforma")
+
+[node name="meta" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -7.2)
+use_collision = true
+size = Vector3(7.8, 1, 4)
+material = SubResource("material_meta")
+
+[node name="pozo" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.5, 0)
+use_collision = true
+size = Vector3(7.8, 1, 10.4)
+material = SubResource("material_pozo")
+
+[node name="pared_este" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.15, -3, 0)
+use_collision = true
+size = Vector3(0.5, 12, 19.4)
+material = SubResource("material_pared")
+
+[node name="pared_oeste" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.15, -3, 0)
+use_collision = true
+size = Vector3(0.5, 12, 19.4)
+material = SubResource("material_pared")
+
+[node name="pared_norte" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -9.45)
+use_collision = true
+size = Vector3(8.8, 4, 0.5)
+material = SubResource("material_pared")
+
+[node name="pared_sur" type="CSGBox3D" parent="geometria"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 9.45)
+use_collision = true
+size = Vector3(8.8, 4, 0.5)
+material = SubResource("material_pared")
+
+[node name="puzzle_piso" type="Node3D" parent="." node_paths=PackedStringArray("spawner")]
+script = ExtResource("2_puzzle")
+spawner = NodePath("../spawner_jugadores")
+
+[node name="letrero_meta" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -9.18)
+pixel_size = 0.006
+modulate = Color(0.25, 0.2, 0.1, 1)
+outline_size = 0
+text = "META"
+font_size = 96
+
+[node name="letrero_inicio" type="Label3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -3.88, 1.5, 6.5)
+pixel_size = 0.003
+modulate = Color(1, 0.95, 0.7, 1)
+text = "Solo el CIEGO puede cruzar:
+bajo los demás, el piso se cae"
+font_size = 56
+
+[node name="puntos_aparicion" type="Node3D" parent="."]
+
+[node name="punto_1" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 7.5)
+
+[node name="punto_2" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5)
+
+[node name="punto_3" type="Marker3D" parent="puntos_aparicion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 7.5)
+
+[node name="jugadores" type="Node3D" parent="."]
+
+[node name="spawner_jugadores" type="MultiplayerSpawner" parent="." node_paths=PackedStringArray("puntos_aparicion")]
+spawn_path = NodePath("../jugadores")
+script = ExtResource("1_spawner")
+puntos_aparicion = NodePath("../puntos_aparicion")
+
+[node name="siluetas" type="Node" parent="."]
+script = ExtResource("3_siluetas")
+
+[node name="control_rondas" type="Node" parent="." node_paths=PackedStringArray("puzzle", "spawner", "aviso")]
+script = ExtResource("4_rondas")
+puzzle = NodePath("../puzzle_piso")
+spawner = NodePath("../spawner_jugadores")
+aviso = NodePath("../interfaz/aviso_ronda")
+
+[node name="interfaz" type="CanvasLayer" parent="."]
+
+[node name="aviso_ronda" type="Control" parent="interfaz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("5_aviso")
+
+[node name="centro" type="CenterContainer" parent="interfaz/aviso_ronda"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 40.0
+offset_bottom = 260.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="columna" type="VBoxContainer" parent="interfaz/aviso_ronda/centro"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="titulo" type="Label" parent="interfaz/aviso_ronda/centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 56
+horizontal_alignment = 1
+
+[node name="subtitulo" type="Label" parent="interfaz/aviso_ronda/centro/columna"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+autowrap_mode = 3

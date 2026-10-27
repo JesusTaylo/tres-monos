@@ -51,6 +51,9 @@ var _dispositivo := "Default"
 
 
 func _ready() -> void:
+	# Queda en el log (user://logs/godot.log): ayuda a diagnosticar "no se oye nada".
+	print("Voz: %s · micrófonos: %s" % ["disponible (TwoVoIP)" if disponible() else "NO disponible: falta la extensión TwoVoIP",
+		", ".join(dispositivos())])
 	if ARGUMENTO_VOZ_PRUEBA in OS.get_cmdline_user_args():
 		voz_prueba = true
 
@@ -108,6 +111,9 @@ func _encender() -> void:
 	if voz_prueba:
 		_voz_sintetica = VozPrueba.new()
 		_deuda_muestras = 0.0
+	elif not _tiene_permiso():
+		# Android: se pidió el permiso; al responder se vuelve a intentar.
+		_error_dispositivo = ERR_UNAUTHORIZED
 	else:
 		_error_dispositivo = AudioServer.set_input_device_active(true)
 		if _error_dispositivo != OK:
@@ -123,6 +129,21 @@ func _apagar() -> void:
 	_codec_listo = false
 	nivel = 0.0
 	_poner_hablando(false)
+
+
+## En Android grabar audio necesita permiso. Si todavía no lo hay, lo pide
+## (el teléfono muestra el diálogo) y devuelve false; al aceptarlo se reintenta.
+func _tiene_permiso() -> bool:
+	if OS.get_name() != "Android":
+		return true
+	if not get_tree().on_request_permissions_result.is_connected(_al_responder_permiso):
+		get_tree().on_request_permissions_result.connect(_al_responder_permiso)
+	return OS.request_permission("android.permission.RECORD_AUDIO")
+
+
+func _al_responder_permiso(permiso: String, concedido: bool) -> void:
+	if permiso.ends_with("RECORD_AUDIO") and concedido:
+		_reiniciar_entrada()
 
 
 ## Al cambiar de dispositivo o de fuente, se cierra y se vuelve a abrir.

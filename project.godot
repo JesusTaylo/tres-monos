@@ -11,6 +11,8 @@ config_version=5
 [application]
 
 config/name="Monkey See, Monkey Don't"
+config/version="0.2.0"
+config/icon="res://icon.png"
 run/main_scene="res://scenes/main/menu_principal.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
@@ -33,6 +35,8 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+; Teléfono: horizontal, y se da vuelta si se gira el teléfono.
+window/handheld/orientation=4
 
 [input]
 
@@ -100,5 +104,7 @@ hablar={
 
 [rendering]
 
+; Formato de texturas de los teléfonos (necesario para exportar a Android).
+textures/vram_compression/import_etc2_astc=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

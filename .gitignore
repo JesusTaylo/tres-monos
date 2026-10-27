@@ -4,8 +4,8 @@
 # Plantillas de exportación de Android
 /android/
 
-# Presets de exportación: pueden incluir rutas locales o credenciales de firma
-export_presets.cfg
+# export_presets.cfg SÍ se sube: en Godot 4 las credenciales de firma van aparte,
+# en .godot/export_credentials.cfg (ya ignorado junto con .godot/).
 
 # Builds exportados
 /build/
@@ -22,3 +22,6 @@ desktop.ini
 .mono/
 data_*/
 mono_crash.*.json
+
+# Copias temporales que hace el editor de las DLL de extensiones (GDExtension)
+~*.dll

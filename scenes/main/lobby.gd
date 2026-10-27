@@ -10,12 +10,13 @@ extends Control
 @onready var _etiqueta_descripcion: Label = %etiqueta_descripcion
 @onready var _boton_asignar: Button = %boton_asignar
 @onready var _boton_empezar: Button = %boton_empezar
+@onready var _selector_prueba: OptionButton = %selector_prueba
 @onready var _boton_salir: Button = %boton_salir
 
 
 func _ready() -> void:
 	_boton_asignar.pressed.connect(Lobby.asignar_roles)
-	_boton_empezar.pressed.connect(Lobby.empezar_partida)
+	_boton_empezar.pressed.connect(func() -> void: Lobby.empezar_partida(_selector_prueba.selected))
 	_boton_salir.pressed.connect(Red.desconectar)
 	Lobby.estado_cambiado.connect(_actualizar)
 
@@ -25,6 +26,11 @@ func _ready() -> void:
 	_etiqueta_ip.visible = multiplayer.is_server()
 	_boton_asignar.visible = multiplayer.is_server()
 	_boton_empezar.visible = multiplayer.is_server()
+	# Debug: saltar directo a cualquier prueba sin jugar las anteriores.
+	for i in Lobby.PRUEBAS.size():
+		_selector_prueba.add_item("Empezar en: %d. %s" % [i + 1, Lobby.nombre_prueba(i)])
+	_selector_prueba.selected = 0
+	_selector_prueba.visible = multiplayer.is_server() and OS.is_debug_build()
 	_actualizar()
 
 

@@ -74,6 +74,40 @@ func desconectar() -> void:
 	desconectado.emit()
 
 
+## Convierte un nombre (por ejemplo un túnel de playit.gg) en IP sin congelar
+## el juego: si no existe puede tardar varios segundos. Usar con await.
+## Devuelve "" si no se encontró.
+func resolver(direccion: String) -> String:
+	if direccion.is_valid_ip_address():
+		return direccion
+	var id := IP.resolve_hostname_queue_item(direccion, IP.TYPE_IPV4)
+	while IP.get_resolve_item_status(id) == IP.RESOLVER_STATUS_WAITING:
+		await get_tree().process_frame
+	var ip := ""
+	if IP.get_resolve_item_status(id) == IP.RESOLVER_STATUS_DONE:
+		ip = IP.get_resolve_item_address(id)
+	IP.erase_resolve_item(id)
+	return ip
+
+
+## Separa "direccion" o "direccion:puerto" en [direccion, puerto].
+## Devuelve [] si el texto no tiene forma de dirección o el puerto no es válido.
+static func separar_direccion(texto: String) -> Array:
+	var direccion := texto.strip_edges()
+	var puerto := PUERTO_POR_DEFECTO
+	if direccion.count(":") == 1:
+		var partes := direccion.split(":")
+		direccion = partes[0]
+		if not partes[1].is_valid_int():
+			return []
+		puerto = partes[1].to_int()
+		if puerto < 1 or puerto > 65535:
+			return []
+	if direccion.is_empty() or direccion.contains(" "):
+		return []
+	return [direccion, puerto]
+
+
 ## IPs IPv4 privadas de esta máquina, para decírselas a los demás jugadores.
 func ips_locales() -> PackedStringArray:
 	var resultado := PackedStringArray()

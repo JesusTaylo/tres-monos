@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/jugador.gd" id="1_jugador"]
 [ext_resource type="Script" path="res://scripts/systems/interaccion.gd" id="2_interaccion"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" path="res://scenes/ui/indicador_rol.gd" id="8_indicador"]
 [ext_resource type="Script" path="res://scenes/player/voz_jugador.gd" id="9_voz"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="10_pausa"]
+[ext_resource type="Script" path="res://scenes/ui/controles_tactiles.gd" id="11_tactiles"]
+[ext_resource type="Script" path="res://scenes/player/ragdoll_jugador.gd" id="12_ragdoll"]
 
 [sub_resource type="CapsuleShape3D" id="forma_cuerpo"]
 radius = 0.35
@@ -182,6 +184,11 @@ script = ExtResource("9_voz")
 altavoz = NodePath("../cabeza/altavoz_voz")
 boca = NodePath("../cabeza/cara/boca")
 
+[node name="ragdoll" type="Node" parent="." node_paths=PackedStringArray("modelo", "camara")]
+script = ExtResource("12_ragdoll")
+modelo = NodePath("../modelo")
+camara = NodePath("../cabeza/camara")
+
 [node name="sincronizador" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("config_sincronizacion")
 
@@ -267,5 +274,16 @@ theme_override_colors/font_color = Color(1, 1, 1, 0.75)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 16
+
+[node name="controles_tactiles" type="Control" parent="hud" node_paths=PackedStringArray("jugador")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("11_tactiles")
+jugador = NodePath("../..")
 
 [node name="menu_pausa" parent="hud" instance=ExtResource("10_pausa")]
